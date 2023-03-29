@@ -1,0 +1,193 @@
+/*
+ * Copyright 2022 Ally Financial, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/assets/css/introjs.min.css">
+    <link rel="stylesheet" href="popup.css">
+    <script src="/assets/js/aria-query.min.js"></script>
+    <script src="/assets/js/editor/src/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/assets/js/editor/src/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/assets/js/editor/src/mode-javascript.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/assets/js/editor/src/ext-language_tools.js"></script>
+    <script src="/assets/js/editor/src/ext-emmet.js"></script>
+    <script src="/assets/js/editor/src/ext-beautify.js"></script>
+    <script src="/assets/js/editor/src/ext-elastic_tabstops_lite.js"></script>
+    <script src="/assets/js/intro/intro.min.js"></script>
+    <script src="/scripts/variables.js"></script>
+    <style>
+        .ace_scrollbar::-webkit-scrollbar {
+            height: 7px;
+            width: 7px;
+        }
+
+        .ace_scrollbar::-webkit-scrollbar-track {
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            background-color: #272822;
+            /* Matches ace monokai */
+            border-radius: 10px;
+        }
+
+        .ace_scrollbar::-webkit-scrollbar-thumb {
+            background-color: darkgrey;
+            outline: 1px solid slategrey;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="initial-loading">
+        <div>
+            <i class="fa fa-spin fa-spinner"></i>
+            <h2 style="font-size: 1.5rem;margin-top: 1rem;">Loading...</h2>
+        </div>
+    </div>
+    <div id="main-section">
+        <div class="header">
+            <h2 id="title">Cypress Code Generator<i id="help" title="How to use?" class="fa fa-info-circle"
+                    style="margin-left: 0.25rem;"></i></h2>
+            <div id="controls">
+                <div id="inspect"
+                    title="Find the cypress element selector of a element by hovering the mouse on the element">
+                    <!-- inspect icon svg -->
+                    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="50.000000pt" height="50.000000pt"
+                        viewBox="0 0 50.000000 50.000000" preserveAspectRatio="xMidYMid meet">
+                        <g transform="translate(0.000000,50.000000) scale(0.100000,-0.100000)" fill="#000000"
+                            stroke="none">
+                            <path d="M145 456 c-17 -7 -45 -29 -62 -49 -56 -64 -56 -150 0 -214 54 -61
+                   122 -78 194 -48 l37 16 63 -63 c49 -49 65 -60 75 -50 10 10 -1 26 -50 75 l-62
+                   63 20 39 c70 137 -74 292 -215 231z m135 -26 c45 -23 80 -80 80 -130 0 -50
+                   -35 -107 -80 -130 -21 -11 -53 -20 -70 -20 -50 0 -107 35 -130 80 -38 74 -16
+                   153 56 196 48 29 92 30 144 4z" />
+                            <path d="M210 338 c-6 -24 -15 -58 -20 -77 -9 -34 -6 -51 6 -39 4 5 43 141 44
+                   156 0 1 -4 2 -10 2 -5 0 -14 -19 -20 -42z" />
+                            <path d="M124 325 c-15 -23 -15 -27 0 -50 9 -14 21 -25 27 -25 7 0 5 10 -5 25
+                   -15 23 -15 27 0 50 10 15 12 25 5 25 -6 0 -18 -11 -27 -25z" />
+                            <path d="M274 325 c15 -23 15 -27 0 -50 -10 -15 -12 -25 -5 -25 6 0 18 11 27
+                   25 15 23 15 27 0 50 -9 14 -21 25 -27 25 -7 0 -5 -10 5 -25z" />
+                        </g>
+                    </svg>
+                </div>
+                <i id="start" title="Start Recording" class="fa fa-play action-btn"></i>
+                <i id="stop" title="Stop Recording" class="fa fa-stop action-btn" style="display: none;"></i>
+                <i id="pause" title="Pause the recording" class="fa fa-pause action-btn" style="display: none;"></i>
+                <i id="refresh" title="Reset the code" class="fa fa-refresh action-btn"></i>
+
+                <i id="copy_btn" class="fa fa-clone action-btn" style="display: none;"></i>
+            </div>
+        </div>
+        <div id="code-editor">
+
+        </div>
+    </div>
+    <div id="settings-section" class="animate-section">
+        <i id="toggle-settings" class="fa fa-cog open-close" data-toggle="false"></i>
+        <h1 class="heading"><i class="fa fa-cog"></i>Settings</h1>
+        <div class="section">
+            <h2 class="section-heading">Element Selector Order <i class="fa fa-question-circle-o"
+                    title="Rearrange the items by dragging the icon(2 vertical lines at the left side of each item)"></i>
+            </h2>
+            <div class="list" sortable-list="sortable-list" id="element-selector-order">
+                <div class="list__item" sortable-item="sortable-item">
+                    <div class="list__item-handle" sortable-handle="sortable-handle"
+                        title="Rearrange the item by dragging and dropping"
+                        title="Rearrange the item by dragging and dropping"></div>
+                    <div class="list__item-content">
+                        <div class="list__item-title">cy.findByRole</div>
+                        <!-- <div class="list__item-description">Aenean aliquam molestie urna, vel aliquam.</div> -->
+                    </div>
+
+                </div>
+                <div class="list__item" sortable-item="sortable-item">
+                    <div class="list__item-handle" sortable-handle="sortable-handle"
+                        title="Rearrange the item by dragging and dropping"></div>
+                    <div class="list__item-content">
+                        <div class="list__item-title">cy.findByText</div>
+                    </div>
+                </div>
+                <div class="list__item" sortable-item="sortable-item">
+                    <div class="list__item-handle" sortable-handle="sortable-handle"
+                        title="Rearrange the item by dragging and dropping"></div>
+                    <div class="list__item-content">
+                        <div class="list__item-title">cy.findByLabelText</div>
+                    </div>
+                </div>
+                <div class="list__item" sortable-item="sortable-item">
+                    <div class="list__item-handle" sortable-handle="sortable-handle"
+                        title="Rearrange the item by dragging and dropping"></div>
+                    <div class="list__item-content">
+                        <div class="list__item-title">cy.findByPlaceholderText</div>
+                    </div>
+                </div>
+                <div class="list__item" sortable-item="sortable-item">
+                    <div class="list__item-handle" sortable-handle="sortable-handle"
+                        title="Rearrange the item by dragging and dropping"></div>
+                    <div class="list__item-content">
+                        <div class="list__item-title">cy.findByTestId</div>
+                    </div>
+                </div>
+                <div class="list__item" sortable-item="sortable-item">
+                    <div class="list__item-handle" sortable-handle="sortable-handle"
+                        title="Rearrange the item by dragging and dropping"></div>
+                    <div class="list__item-content">
+                        <div class="list__item-title">cy.get</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2 class="section-heading">Other</h2>
+            <div class="settings-container">
+                <div class="setting-controller" id="trim-setting">
+                    <h3>Trim</h3>
+                    <div class="switch">
+                        <input id="use-trim" type="checkbox">
+                        <label for="use-trim"></label>
+                    </div>
+                </div>
+                <div class="setting-controller" id="all-elements-setting">
+                    <h3>Consider All Elements</h3>
+                    <div class="switch">
+                        <input id="all-elements" type="checkbox">
+                        <label for="all-elements"></label>
+                    </div>
+                </div>
+                <!-- <div class="setting-controller">
+                    <h3>TestId</h3>
+                    <div class="form-input">
+                        <input id="test-id" type="text" spellcheck="false" autocomplete="off"
+                            placeholder="Enter the test id" value="data-testid">
+                    </div>
+                </div> -->
+            </div>
+        </div>
+
+    </div>
+    <div id="copied_message">
+        <i class="fa fa-check"></i>
+        <span>Copied</span>
+    </div>
+    <!-- <div id="settings-btn">
+        <i class="fa fa-cog"></i>
+    </div> -->
+    <script src="popup.js"></script>
+</body>
+
+</html>
